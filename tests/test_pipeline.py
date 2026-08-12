@@ -34,6 +34,9 @@ class TestBaseline(PipelineCase):
         self.assertTrue(result.baseline)
         self.assertEqual(result.announcements, [])
         self.assertTrue(self.settings.snapshot_csv.exists())
+        self.assertTrue(self.settings.report_md(result.date).exists())
+        self.assertIn("首次執行已建立基準資料",
+                      self.settings.report_md(result.date).read_text(encoding="utf-8"))
         self.assertIn("baseline established: 100 cases", result.summary())
 
     def test_second_identical_run_reports_nothing(self):
@@ -41,6 +44,8 @@ class TestBaseline(PipelineCase):
         result = self.run_with(codes_html(FULL))
         self.assertFalse(result.baseline)
         self.assertEqual(result.summary(), "new=0 changed=0")
+        report = self.settings.report_md(result.date).read_text(encoding="utf-8")
+        self.assertIn("今日無新增公告或執行進度異動。", report)
 
 
 class TestNormalOperation(PipelineCase):
@@ -68,12 +73,16 @@ class TestTruncationRegression(PipelineCase):
     def test_truncated_response_does_not_touch_the_snapshot(self):
         self.run_with(codes_html(FULL))
         before = self.settings.snapshot_csv.read_bytes()
+        report_path = self.settings.report_md(TODAY.strftime("%Y-%m-%d"))
+        report_before = report_path.read_bytes()
 
         with self.assertRaises(TruncatedResponse):
             self.run_with(codes_html(FULL[:40]))
 
         self.assertEqual(self.settings.snapshot_csv.read_bytes(), before,
                          "a short response must never become the new baseline")
+        self.assertEqual(report_path.read_bytes(), report_before,
+                         "a failed fetch must not overwrite the daily report")
 
     def test_recovery_run_after_truncation_reports_nothing(self):
         self.run_with(codes_html(FULL))
@@ -99,7 +108,7 @@ class TestTruncationRegression(PipelineCase):
 
         self.assertEqual(result.announcements, [])
         self.assertEqual([r["code"] for r in result.backfill], ["3060"])
-        self.assertTrue(any("backfill" in a for a in result.anomalies))
+        self.assertTrue(any("回補" in a for a in result.anomalies))
         self.assertEqual(self.log_rows()[0]["type"], "backfill")
 
     def test_mass_new_filings_flagged_as_implausible(self):
@@ -109,7 +118,7 @@ class TestTruncationRegression(PipelineCase):
         result = self.run_with(build_html(base + surge))
 
         self.assertEqual(len(result.announcements), 200)
-        self.assertTrue(any("plausibility threshold" in a for a in result.anomalies))
+        self.assertTrue(any("合理門檻" in a for a in result.anomalies))
         self.assertIn("ANOMALY", result.summary())
 
     def test_vanished_cases_are_reported_not_silent(self):
@@ -119,7 +128,7 @@ class TestTruncationRegression(PipelineCase):
         shrunk = FULL[:96]  # within the completeness ratio, so the fetch passes
         result = self.run_with(codes_html(shrunk))
         self.assertEqual(len(result.removed), 4)
-        self.assertTrue(any("vanished" in a for a in result.anomalies))
+        self.assertTrue(any("消失" in a for a in result.anomalies))
         self.assertEqual({r["type"] for r in self.log_rows()}, {"removed"})
 
 

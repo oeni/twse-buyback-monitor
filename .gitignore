@@ -2,17 +2,20 @@
 __pycache__/
 *.py[cod]
 *.egg-info/
+.coverage
 build/
 dist/
 .pytest_cache/
 
-# venv
+# Virtual environments
 .venv/
 venv/
 
-# local runtime output
+# Local runtime output
 data/
+output/
 *.log
 
-# secrets
+# Local configuration
 .env
+.env.*

@@ -80,7 +80,7 @@ class TestRemovals(unittest.TestCase):
 
     def test_large_batch_named_differently(self):
         message = guard.check_removals([case(str(i), "115/08/11") for i in range(100)], 50)
-        self.assertIn("large batch", message)
+        self.assertIn("大量", message)
         self.assertIn("...", message)
 
 

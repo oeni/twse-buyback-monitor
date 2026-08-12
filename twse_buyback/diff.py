@@ -1,11 +1,4 @@
-"""Compare two snapshots.
-
-Reports removals as well as additions and changes. The original tool tracked
-only additions and changes, which meant a truncated response -- whose whole
-symptom is rows going missing -- produced a completely silent, successful-
-looking run. Surfacing removals makes that failure visible even if every other
-guard is bypassed.
-"""
+"""Compare snapshots and report additions, changes, and removals."""
 from __future__ import annotations
 
 from . import config

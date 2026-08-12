@@ -1,14 +1,13 @@
-"""Endpoint constants and runtime settings.
-
-Nothing here points at a personal directory: callers pass a ``Settings`` with
-whatever ``data_dir`` they want.
-"""
+"""Endpoint constants and runtime settings."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
-__all__ = ["Settings", "MOPS_URL", "MARKET_NAME", "PURPOSE_MAP", "COLUMNS", "N_COLUMNS"]
+__all__ = [
+    "Settings", "default_output_dir", "MOPS_URL", "MARKET_NAME",
+    "PURPOSE_MAP", "COLUMNS", "N_COLUMNS",
+]
 
 # --- MOPS endpoint -------------------------------------------------------
 
@@ -55,12 +54,20 @@ CHANGE_FIELDS = ("done", "bought_shares", "bought_ratio_pct", "bought_amount",
                  "period_end", "note")
 
 
+def default_output_dir() -> Path:
+    """Return ``output/`` in the source checkout, or under the current directory."""
+    source_root = Path(__file__).resolve().parent.parent
+    if (source_root / "pyproject.toml").is_file():
+        return source_root / "output"
+    return Path.cwd() / "output"
+
+
 @dataclass(frozen=True)
 class Settings:
     """Everything the pipeline needs to run.
 
     Args:
-        data_dir: Where the snapshot, change log and run log are written.
+        data_dir: Where reports, the snapshot, and logs are written.
         markets: MOPS market codes to fetch. Defaults to listed + OTC.
         timeout: Per-request timeout in seconds.
         max_attempts: How many times to refetch a market before giving up.
@@ -75,7 +82,7 @@ class Settings:
         user_agent: Sent with every request.
     """
 
-    data_dir: Path
+    data_dir: Path = field(default_factory=default_output_dir)
     markets: tuple = DEFAULT_MARKETS
     timeout: int = 30
     max_attempts: int = 3
@@ -95,6 +102,9 @@ class Settings:
     @property
     def run_log(self) -> Path:
         return self.data_dir / "run.log"
+
+    def report_md(self, run_date: str) -> Path:
+        return self.data_dir / f"{run_date}.md"
 
     def headers(self) -> dict:
         return {"User-Agent": self.user_agent}

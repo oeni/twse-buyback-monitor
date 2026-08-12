@@ -1,18 +1,7 @@
-"""Fetch one market's table, rejecting incomplete responses.
+"""Fetch MOPS tables and reject incomplete responses.
 
-This module is where the project's main historical bug is fixed. MOPS
-intermittently returns a body that is cut off partway through the table. The
-old code accepted it, wrote it over the snapshot, and the next complete
-response then looked like hundreds of brand-new buyback announcements -- 524 on
-one occasion and 998 on another, all of them cases from as far back as 2007.
-
-Two independent checks catch it, and a short retry loop usually makes the
-problem disappear on its own:
-
-1. Structural -- a complete body ends with ``</html>``; a truncated one cannot.
-2. Comparative -- the row count must not collapse relative to the last known
-   good snapshot. This catches truncation that happens to land on a tag
-   boundary.
+Completeness is checked by the HTML terminator and by comparison with the last
+accepted row count. Rejected responses are retried before the run fails.
 """
 from __future__ import annotations
 

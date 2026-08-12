@@ -74,9 +74,8 @@ def check_surge(announcements, threshold):
         A description of the anomaly, or ``None`` when the count is plausible.
     """
     if threshold > 0 and len(announcements) > threshold:
-        return (f"{len(announcements)} announcements in one run exceeds the "
-                f"plausibility threshold of {threshold}; treating as a data "
-                f"artefact rather than news")
+        return (f"單次出現 {len(announcements)} 筆新公告，超過合理門檻 {threshold}；"
+                "請先確認資料完整性。")
     return None
 
 
@@ -95,6 +94,6 @@ def check_removals(removed, threshold):
     detail = ", ".join(f"{r['market']}/{r['code']}" for r in removed[:5])
     if len(removed) > 5:
         detail += ", ..."
-    severity = "unexpected" if len(removed) <= threshold else "large batch of"
-    return (f"{len(removed)} {severity} case(s) vanished from the MOPS table "
-            f"({detail}); historical cases should never disappear")
+    scale = "大量" if len(removed) > threshold else ""
+    return (f"MOPS 資料中有 {len(removed)} 筆{scale}案件消失（{detail}）；"
+            "歷史案件正常不應消失。")

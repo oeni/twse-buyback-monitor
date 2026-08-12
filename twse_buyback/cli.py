@@ -1,12 +1,4 @@
-"""Command-line entry point.
-
-    python -m twse_buyback --data-dir ./data
-
-Exit code 0 means the run completed, 1 means it failed. A run that completed
-but found anomalies still exits 0 -- the data was fetched correctly, it is the
-contents that are suspicious -- so anomalies are surfaced in the log text and
-via ``--strict`` for callers that want them to fail a scheduled job.
-"""
+"""Command-line entry point."""
 from __future__ import annotations
 
 import argparse
@@ -14,7 +6,7 @@ import sys
 import traceback
 from pathlib import Path
 
-from .config import DEFAULT_MARKETS, Settings
+from .config import DEFAULT_MARKETS, Settings, default_output_dir
 from .digest import render
 from .pipeline import log_line, run
 
@@ -27,9 +19,10 @@ def build_parser() -> argparse.ArgumentParser:
         description="Track Taiwan-listed share buyback filings from MOPS and "
                     "report new cases and execution progress.",
     )
-    parser.add_argument("--data-dir", type=Path, default=Path("data"),
-                        help="where snapshot_latest.csv, changes_log.csv and run.log live "
-                             "(default: ./data)")
+    parser.add_argument("--output-dir", "--data-dir", dest="data_dir", type=Path,
+                        default=default_output_dir(),
+                        help="directory for daily Markdown, snapshot, and logs "
+                             "(default: repository output/)")
     parser.add_argument("--markets", nargs="+", default=list(DEFAULT_MARKETS),
                         metavar="CODE", help="MOPS market codes (default: sii otc)")
     parser.add_argument("--timeout", type=int, default=30, help="per-request timeout, seconds")
@@ -77,6 +70,7 @@ def main(argv=None) -> int:
         log_line(f"   anomaly {anomaly}", settings.run_log)
 
     print(result.summary())
+    print(f"report={settings.report_md(result.date)}")
     for anomaly in result.anomalies:
         print(f"  anomaly: {anomaly}", file=sys.stderr)
     if args.print_digest:

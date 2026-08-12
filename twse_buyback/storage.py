@@ -1,22 +1,11 @@
-"""Read and write the snapshot and the change log.
-
-Two CSVs, both UTF-8 with BOM so Excel opens them without mangling Chinese:
-
-``snapshot_latest.csv``
-    The full table as last fetched. Overwritten each run, and only ever with
-    data that passed the fetch guards -- it is the baseline every future diff
-    is measured against, so a bad write poisons every subsequent run.
-
-``changes_log.csv``
-    Append-only history of what changed on each run.
-"""
+"""Read and write reports, snapshots, and change history."""
 from __future__ import annotations
 
 import csv
 
 from . import config
 
-__all__ = ["write_snapshot", "read_snapshot", "append_changes_log",
+__all__ = ["write_snapshot", "read_snapshot", "write_report", "append_changes_log",
            "count_cases_by_market", "SNAPSHOT_FIELDS", "LOG_FIELDS"]
 
 SNAPSHOT_FIELDS = ["market", "is_cumulative"] + config.COLUMNS + ["purpose_text"]
@@ -47,6 +36,12 @@ def read_snapshot(path):
     return rows
 
 
+def write_report(markdown: str, path) -> None:
+    """Write the report for one date, replacing an earlier run from that date."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(markdown.rstrip() + "\n", encoding="utf-8")
+
+
 def count_cases_by_market(records) -> dict:
     """Cases per market, excluding cumulative rows.
 
@@ -62,8 +57,6 @@ def count_cases_by_market(records) -> dict:
 
 
 def _new_detail(rec) -> str:
-    # Chinese, like every other human-facing string: the surrounding columns
-    # (company name, purpose, notes) arrive from MOPS in Chinese anyway.
     return f"預定{rec['planned_shares']}股 {rec['period_start']}~{rec['period_end']}"
 
 

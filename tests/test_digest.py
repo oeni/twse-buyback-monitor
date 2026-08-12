@@ -17,9 +17,8 @@ class TestRender(unittest.TestCase):
     def test_headings_and_counts(self):
         result = RunResult(date="2026-08-11", announcements=[rec("1101", "台泥")])
         out = digest.render(result)
-        self.assertIn("## 2026-08-11", out)
-        self.assertIn("新公告買回（1）", out)
-        self.assertIn("執行進度異動（0）", out)
+        self.assertIn("# 2026-08-11 庫藏股", out)
+        self.assertIn("新公告（1）", out)
         self.assertIn("1101 台泥", out)
         self.assertIn("上市", out)
 
@@ -28,15 +27,16 @@ class TestRender(unittest.TestCase):
                     [("bought_shares", "", "5,000,000"), ("bought_ratio_pct", "", "25.00")])]
         out = digest.render(RunResult(date="2026-08-11", changed=changed))
         self.assertIn("2603 長榮", out)
-        self.assertIn("空→5,000,000", out)
+        self.assertIn("已買回股數：空白 → 5,000,000", out)
 
-    def test_empty_sections_say_so(self):
-        self.assertIn("（無）", digest.render(RunResult(date="2026-08-11")))
+    def test_empty_report_says_there_were_no_updates(self):
+        out = digest.render(RunResult(date="2026-08-11"))
+        self.assertIn("今日無新增公告或執行進度異動。", out)
 
     def test_baseline_run_is_labelled(self):
         result = RunResult(date="2026-08-11", baseline=True, counts={"sii": 100, "otc": 50})
         out = digest.render(result)
-        self.assertIn("baseline", out)
+        self.assertIn("首次執行已建立基準資料", out)
         self.assertIn("150", out)
 
     def test_anomalies_lead_the_report(self):
@@ -45,16 +45,16 @@ class TestRender(unittest.TestCase):
                            anomalies=["998 announcements in one run"])
         out = digest.render(result)
         self.assertIn("資料異常", out)
-        self.assertLess(out.index("資料異常"), out.index("新公告買回"))
+        self.assertLess(out.index("資料異常"), out.index("新公告"))
 
     def test_backfill_and_removals_get_their_own_sections(self):
         result = RunResult(date="2026-08-11",
                            backfill=[rec("3060", "銘異")],
                            removed=[rec("8050", "廣積")])
         out = digest.render(result)
-        self.assertIn("回補的舊案", out)
+        self.assertIn("回補舊案", out)
         self.assertIn("3060", out)
-        self.assertIn("從 MOPS 表中消失的案", out)
+        self.assertIn("從 MOPS 資料中消失", out)
         self.assertIn("8050", out)
 
     def test_long_lists_are_truncated_with_a_pointer(self):

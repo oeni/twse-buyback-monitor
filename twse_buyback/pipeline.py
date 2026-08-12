@@ -1,14 +1,10 @@
-"""Orchestration: fetch, diff, classify, persist.
-
-``run()`` returns a :class:`RunResult` and writes only the CSVs. Anything else
-you want to do with the outcome -- post to Slack, write a note, send mail --
-belongs in your own code, driven by the returned result.
-"""
+"""Fetch, validate, diff, and persist one monitoring run."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import date, datetime
 
+from . import digest
 from . import diff as diff_mod
 from . import fetch as fetch_mod
 from . import guard, storage
@@ -113,6 +109,7 @@ def run(settings, today=None, session=None, sleep=None) -> RunResult:
     if previous is None:
         result.baseline = True
         storage.write_snapshot(records, settings.snapshot_csv)
+        storage.write_report(digest.render(result), settings.report_md(result.date))
         return result
 
     new, changed, removed = diff_mod.diff(previous, records)
@@ -129,14 +126,15 @@ def run(settings, today=None, session=None, sleep=None) -> RunResult:
             result.anomalies.append(check)
     if backfill:
         result.anomalies.append(
-            f"{len(backfill)} case(s) older than {settings.backfill_months} months "
-            f"appeared as new; recorded as backfill, not reported as announcements"
+            f"有 {len(backfill)} 筆超過 {settings.backfill_months} 個月的舊案重新出現；"
+            "已列為回補，不視為今日公告。"
         )
 
     # Written after the diff so a crash mid-diff cannot leave the baseline
     # advanced past changes that were never recorded.
     storage.write_snapshot(records, settings.snapshot_csv)
     storage.append_changes_log(result, settings.changes_log_csv)
+    storage.write_report(digest.render(result), settings.report_md(result.date))
     return result
 
 

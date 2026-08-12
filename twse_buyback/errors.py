@@ -1,9 +1,4 @@
-"""Exception hierarchy.
-
-Every failure mode raises explicitly. Nothing is swallowed and no partial
-result is ever written to disk, because a corrupt baseline snapshot silently
-turns into hundreds of bogus "new announcement" rows on the following run.
-"""
+"""Package exceptions."""
 
 
 class BuybackError(Exception):
@@ -11,23 +6,11 @@ class BuybackError(Exception):
 
 
 class StructureChanged(BuybackError):
-    """The MOPS response no longer looks like the page we know how to parse.
-
-    Raised when the title keyword is missing or when zero data rows survive
-    column-count filtering. Both mean MOPS changed its markup: fail loudly
-    rather than write an empty snapshot.
-    """
+    """The MOPS response no longer matches the expected table structure."""
 
 
 class TruncatedResponse(BuybackError):
-    """The MOPS response arrived incomplete.
-
-    MOPS intermittently returns a response that is cut off partway through the
-    table. The HTML still parses and still contains valid rows, so nothing
-    downstream notices -- the tail of the table (high stock codes) simply
-    vanishes. Overwriting the snapshot with that partial data is what produces
-    the mass false-positive "new case" reports when the full response returns.
-    """
+    """MOPS did not return a complete table within the retry limit."""
 
 
 class FetchError(BuybackError):
