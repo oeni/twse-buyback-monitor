@@ -15,6 +15,8 @@ venv/
 data/
 output/
 *.log
+# ...but the committed sample run log is part of the documentation
+!examples/run.log
 
 # Local configuration
 .env

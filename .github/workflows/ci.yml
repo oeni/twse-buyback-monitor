@@ -23,6 +23,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - run: pip install -e .
       - run: python -m unittest discover -s tests -t . -v
+      - name: examples stay in sync with the code
+        run: |
+          python examples/regenerate.py
+          git diff --exit-code examples/
 
   live:
     # Only on the weekly schedule: MOPS should not be hit on every push.
