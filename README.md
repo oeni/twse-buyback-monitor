@@ -1,9 +1,29 @@
 # twse-buyback-monitor
 
+[![tests](https://github.com/oeni/twse-buyback-monitor/actions/workflows/ci.yml/badge.svg)](https://github.com/oeni/twse-buyback-monitor/actions/workflows/ci.yml)
+[![daily data](https://github.com/oeni/twse-buyback-monitor/actions/workflows/daily-data.yml/badge.svg)](https://github.com/oeni/twse-buyback-monitor/actions/workflows/daily-data.yml)
+
 Daily Markdown reports for share buyback filings by Taiwan-listed and OTC
 companies. Data comes from the Market Observation Post System (MOPS).
 
 [繁體中文](README.zh-TW.md)
+
+## Live data
+
+This repository collects its own dataset. Every trading day at 18:10
+Asia/Taipei, a [scheduled workflow](.github/workflows/daily-data.yml) runs the
+monitor on GitHub's servers and commits the result to [`data/`](data/):
+
+| File | Contents |
+|---|---|
+| `data/YYYY-MM-DD.md` | That day's report — one file per trading day. |
+| `data/changes_log.csv` | Every new filing and execution update since collection began. |
+| `data/snapshot_latest.csv` | The full MOPS table: ~5,700 filings back to the year 2000. |
+| `data/run.log` | One line per run, with retries and data warnings. |
+
+MOPS only ever shows the *current* state of each filing. The commit history
+here adds the dimension MOPS does not publish: *when* each filing appeared and
+how its execution progressed day by day.
 
 ## Quick start
 
@@ -142,6 +162,14 @@ for the failure that led to these checks.
 
 The MOPS endpoint used by this project is an internal web endpoint, not a
 documented API. A site change can require a parser update.
+
+## Data source and disclaimer
+
+The data consists of statutory public disclosures published by Taiwan's
+Market Observation Post System (公開資訊觀測站). It is redistributed here for
+research reference only, with no warranty of accuracy, completeness, or
+timeliness — verify against MOPS before acting on it. Nothing in this
+repository is investment advice.
 
 ## Library use
 

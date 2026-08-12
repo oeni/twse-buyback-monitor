@@ -11,12 +11,13 @@ dist/
 .venv/
 venv/
 
-# Local runtime output
-data/
+# Local runtime output (data/ is NOT ignored: it holds the live dataset
+# committed by the daily-data workflow)
 output/
 *.log
-# ...but the committed sample run log is part of the documentation
+# ...but the committed sample and live-dataset run logs are documentation
 !examples/run.log
+!data/run.log
 
 # Local configuration
 .env

@@ -1,9 +1,28 @@
 # 台股庫藏股監控
 
+[![tests](https://github.com/oeni/twse-buyback-monitor/actions/workflows/ci.yml/badge.svg)](https://github.com/oeni/twse-buyback-monitor/actions/workflows/ci.yml)
+[![daily data](https://github.com/oeni/twse-buyback-monitor/actions/workflows/daily-data.yml/badge.svg)](https://github.com/oeni/twse-buyback-monitor/actions/workflows/daily-data.yml)
+
 每天從公開資訊觀測站（MOPS）取得上市、上櫃公司的庫藏股申報，整理成
 Markdown 日報，並追蹤既有案件的執行進度。
 
 [English](README.md)
+
+## 即時資料
+
+本 repo 會自己蒐集資料。每個交易日 18:10（台北時間），
+[排程 workflow](.github/workflows/daily-data.yml) 會在 GitHub 的伺服器上
+跑一次監控，把結果 commit 進 [`data/`](data/)：
+
+| 檔案 | 內容 |
+|---|---|
+| `data/YYYY-MM-DD.md` | 當日日報，一個交易日一個檔。 |
+| `data/changes_log.csv` | 開始蒐集以來的所有新公告與執行進度異動。 |
+| `data/snapshot_latest.csv` | 完整 MOPS 表：約 5,700 筆申報，回溯到 2000 年。 |
+| `data/run.log` | 每次執行一行，含重試與資料警示。 |
+
+MOPS 只顯示每筆申報「現在的狀態」；本 repo 的 commit 歷史補上了 MOPS
+沒有發布的維度——每筆申報是**哪一天**出現的、執行進度**逐日**怎麼走。
 
 ## 快速開始
 
@@ -131,6 +150,12 @@ MOPS 偶爾會回傳 HTTP 200，但表格內容並不完整。本工具會拒收
 
 本專案使用的是 MOPS 網站內部端點，不是正式公開 API；網站改版時可能需要
 同步調整解析器。
+
+## 資料來源與聲明
+
+資料為公開資訊觀測站發布的法定公開申報資訊，本 repo 僅作研究參考之再散布，
+不保證正確性、完整性與即時性——採取任何行動前請以 MOPS 原站為準。本 repo
+任何內容均非投資建議。
 
 ## 當成 Python 函式庫使用
 

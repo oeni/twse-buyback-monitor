@@ -1,0 +1,51 @@
+name: daily data
+
+# Collects the repository's own dataset: runs the monitor on GitHub's servers
+# after the Taiwan market closes and commits the result to data/. The commit
+# history doubles as a timeline of when each filing appeared.
+
+on:
+  schedule:
+    # 18:10 Asia/Taipei (10:10 UTC), Monday to Friday. MOPS updates during
+    # Taiwan business hours; one run after the close catches the day. Kept off
+    # the exact hour because GitHub delays on-the-hour schedules the most.
+    - cron: "10 10 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-data
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -e .
+
+      - name: run the monitor
+        id: monitor
+        shell: bash
+        run: |
+          python -m twse_buyback --output-dir data | tee stdout.txt
+          echo "summary=$(head -n 1 stdout.txt)" >> "$GITHUB_OUTPUT"
+
+      - name: commit the day's data
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          if git diff --cached --quiet; then
+            echo "nothing changed today"
+            exit 0
+          fi
+          git commit -m "data: $(TZ=Asia/Taipei date +%F) ${{ steps.monitor.outputs.summary }}"
+          git pull --rebase origin main
+          git push origin main
