@@ -5,3 +5,5 @@
 2026-08-17T10:45:29    anomaly MOPS 資料中有 2 筆案件消失（sii/2355, otc/6804）；歷史案件正常不應消失。
 2026-08-18T10:42:27 OK new=2 changed=0 removed=1 ANOMALY=1
 2026-08-18T10:42:27    anomaly MOPS 資料中有 1 筆案件消失（otc/8171）；歷史案件正常不應消失。
+2026-08-19T10:43:02 OK new=0 changed=1 removed=1 ANOMALY=1
+2026-08-19T10:43:02    anomaly MOPS 資料中有 1 筆案件消失（otc/6284）；歷史案件正常不應消失。
