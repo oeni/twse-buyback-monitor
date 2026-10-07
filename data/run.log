@@ -48,3 +48,4 @@
 2026-10-05T19:15:47 OK new=0 changed=3
 2026-10-06T16:48:02 OK new=1 changed=3 backfill=1 ANOMALY=1
 2026-10-06T16:48:02    anomaly 有 1 筆超過 6 個月的舊案重新出現；已列為回補，不視為今日公告。
+2026-10-07T17:27:19 OK new=0 changed=4
