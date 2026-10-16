@@ -56,3 +56,6 @@
 2026-10-13T17:36:18 OK new=0 changed=2
 2026-10-14T15:04:54 OK new=0 changed=0
 2026-10-15T14:59:14 OK new=0 changed=1
+2026-10-16T14:48:02 OK new=1 changed=0 backfill=3 removed=4 ANOMALY=2
+2026-10-16T14:48:02    anomaly MOPS 資料中有 4 筆案件消失（otc/8908, otc/8908, otc/8908, otc/8908）；歷史案件正常不應消失。
+2026-10-16T14:48:02    anomaly 有 3 筆超過 6 個月的舊案重新出現；已列為回補，不視為今日公告。
