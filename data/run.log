@@ -76,3 +76,5 @@
 2026-11-04T17:57:20 OK new=1 changed=0
 2026-11-05T17:58:14 OK new=3 changed=0
 2026-11-06T17:26:10 OK new=7 changed=1
+2026-11-09T20:39:47 OK new=3 changed=2 removed=1 ANOMALY=1
+2026-11-09T20:39:47    anomaly MOPS 資料中有 1 筆案件消失（otc/3131）；歷史案件正常不應消失。
